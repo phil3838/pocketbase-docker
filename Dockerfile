@@ -1,18 +1,22 @@
 FROM alpine:3 as downloader
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG TARGETVARIANT
-ARG VERSION
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+ARG TARGETVARIANT=
+ARG VERSION=0.28.4
 
-ENV BUILDX_ARCH="${TARGETOS:-linux}_${TARGETARCH:-amd64}${TARGETVARIANT}"
+ENV BUILDX_ARCH="${TARGETOS}_${TARGETARCH}${TARGETVARIANT}"
 
+# Install wget and unzip
+RUN apk add --no-cache wget unzip
+
+# Download and unzip PocketBase
 RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${VERSION}/pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
     && unzip pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
-    && chmod +x /pocketbase
+    && chmod +x pocketbase
 
 FROM alpine:3
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk add --no-cache ca-certificates
 
 EXPOSE 8090
 
